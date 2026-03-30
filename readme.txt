@@ -91,3 +91,18 @@ Password hashing with bcrypt
 JWT authentication
 Role-based access control
 Rate limiting on login
+
+SQL
+Users
+-----
+id (PK)
+username
+password
+role
+
+APs
+-----
+id (PK)
+room
+mac_address
+image_path
