@@ -508,14 +508,17 @@
 
 						<div class="card">
 							<div class="actions-grid">
-								<button id="goRegisterBtn" class="menu-button" type="button">
-									<span class="menu-title">Registar AP</span>
-								</button>
-								<button id="goSearchBtn" class="menu-button" type="button">
-									<span class="menu-title">Pesquisar AP</span>
-								</button>
-								<button id="logoutBtn" class="logout" type="button">Logout</button>
-							</div>
+	<button id="goRegisterBtn" class="menu-button" type="button">
+		<span class="menu-title">Registar AP</span>
+	</button>
+	<button id="goSearchBtn" class="menu-button" type="button">
+		<span class="menu-title">Pesquisar AP</span>
+	</button>
+	<button id="exportPdfBtn" class="menu-button hidden" type="button">
+		<span class="menu-title">Exportar PDF</span>
+	</button>
+	<button id="logoutBtn" class="logout" type="button">Logout</button>
+</div>
 						</div>
 					</div>
 				</section>
@@ -598,6 +601,7 @@
 			const goRegisterBtn = document.getElementById("goRegisterBtn");
 			const goSearchBtn = document.getElementById("goSearchBtn");
 			const logoutBtn = document.getElementById("logoutBtn");
+			const exportPdfBtn = document.getElementById("exportPdfBtn");
 			const backFromRegisterBtn = document.getElementById("backFromRegisterBtn");
 			const backFromSearchBtn = document.getElementById("backFromSearchBtn");
 			const uploadForm = document.getElementById("uploadForm");
@@ -677,8 +681,14 @@
 			}
 
 			function setUserInfo() {
-				userInfo.textContent = "Utilizador: " + usernameLogged + " • Perfil: " + role;
-			}
+	userInfo.textContent = "Utilizador: " + usernameLogged + " • Perfil: " + role;
+
+	if (role === "admin") {
+		exportPdfBtn.classList.remove("hidden");
+	} else {
+		exportPdfBtn.classList.add("hidden");
+	}
+}
 
 			function createMessage(type, text) {
 				const p = document.createElement("p");
@@ -893,6 +903,34 @@
 				}
 			}
 
+			async function exportPdf() {
+	try {
+		const res = await apiFetch("/aps/admin/export/pdf");
+
+		if (!res) return;
+
+		if (!res.ok) {
+			const data = await res.json().catch(() => ({}));
+			alert(data.detail || "Não foi possível exportar o PDF.");
+			return;
+		}
+
+		const blob = await res.blob();
+		const url = window.URL.createObjectURL(blob);
+
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = "aps_report.pdf";
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+
+		window.URL.revokeObjectURL(url);
+	} catch (error) {
+		alert("Erro de ligação ao servidor.");
+	}
+}
+
 			function logout() {
 				goToLogin();
 			}
@@ -947,6 +985,10 @@
 
 			backFromRegisterBtn.addEventListener("click", function () {
 				showScreen("menuScreen");
+			});
+
+			exportPdfBtn.addEventListener("click", function () {
+				exportPdf();
 			});
 
 			backFromSearchBtn.addEventListener("click", function () {

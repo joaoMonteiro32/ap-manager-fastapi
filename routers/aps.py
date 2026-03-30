@@ -7,12 +7,12 @@ from pathlib import Path
 from mimetypes import guess_type
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-
+from ..services.pdf_export import build_aps_pdf
 from ..database import get_db
 from ..models import AP, User
 from ..deps import get_current_user, require_admin
@@ -350,3 +350,18 @@ def delete_ap(
         "success": True,
         "message": f"AP com ID {ap_id} apagado com sucesso",
     }
+
+@router.get("/admin/export/pdf")
+def export_aps_pdf(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_admin),
+):
+    aps = db.query(AP).order_by(AP.quarto.asc()).all()
+
+    pdf_buffer = build_aps_pdf(aps, UPLOADS_DIR)
+
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'attachment; filename="aps_report.pdf"'},
+    )

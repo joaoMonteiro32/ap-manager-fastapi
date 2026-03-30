@@ -10,3 +10,4 @@ pytesseract
 passlib[bcrypt]
 python-jose
 slowapi
+reportlab
