@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="pt">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+		<meta name="theme-color" content="#0f172a" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<title>AP Manager</title>
+
+		<style>
+			:root {
+				--bg: #eaf0f6;
+				--panel: rgba(255, 255, 255, 0.88);
+				--panel-strong: #ffffff;
+				--text: #0f172a;
+				--muted: #64748b;
+				--line: rgba(148, 163, 184, 0.25);
+				--danger: #dc2626;
+				--success: #15803d;
+				--shadow: 0 18px 50px rgba(15, 23, 42, 0.14);
+				--radius-xl: 26px;
+				--radius-lg: 18px;
+				--radius-md: 14px;
+				--app-width: 430px;
+				--safe-top: max(16px, env(safe-area-inset-top));
+				--safe-bottom: max(16px, env(safe-area-inset-bottom));
+			}
+
+			* {
+				box-sizing: border-box;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+				font-family: Inter, Arial, sans-serif;
+				background:
+					radial-gradient(circle at top, rgba(15, 23, 42, 0.08), transparent 32%),
+					linear-gradient(180deg, #f8fbff 0%, #e9f0f7 100%);
+				color: var(--text);
+			}
+
+			body {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 18px;
+			}
+
+			button,
+			input,
+			select,
+			textarea {
+				font: inherit;
+			}
+
+			.app-shell {
+				width: min(100%, var(--app-width));
+				height: min(100dvh - 24px, 900px);
+				background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.84));
+				backdrop-filter: blur(14px);
+				border: 1px solid rgba(255,255,255,0.75);
+				box-shadow: var(--shadow);
+				border-radius: 30px;
+				overflow: hidden;
+				position: relative;
+			}
+
+			.app-shell::before {
+				content: "";
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				background: linear-gradient(180deg, rgba(255,255,255,0.55), transparent 22%);
+			}
+
+			.app-container {
+				position: relative;
+				height: 100%;
+			}
+
+			.screen {
+				display: none;
+				height: 100%;
+				padding: var(--safe-top) 18px var(--safe-bottom);
+			}
+
+			.screen.active {
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+			}
+
+			.screen-inner {
+				flex: 1;
+				min-height: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+			}
+
+			.screen-center {
+				justify-content: center;
+			}
+
+			.header {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+			}
+
+			.brand-row {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 10px;
+			}
+
+			.brand-chip {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto; /* centra horizontalmente */
+	padding: 10px 16px;
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 1);
+	color:  #ffffff;
+	font-size: 14px; /* maior */
+	font-weight: 800;
+	letter-spacing: 0.05em;
+}
+
+			.title {
+				text-align: center;
+				font-size: 28px;
+				font-weight: 800;
+				margin: 0 0 16px;
+			}
+
+			.subtitle {
+				margin: 0;
+				font-size: 14px;
+				line-height: 1.45;
+				color: var(--muted);
+				text-align: center;
+			}
+
+			.card {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: var(--radius-xl);
+				padding: 18px;
+				box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+			}
+
+			.card.fill {
+				flex: 1;
+				min-height: 0;
+				display: flex;
+				flex-direction: column;
+			}
+
+			.card-header {
+				display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	margin-bottom: 14px;
+	text-align: center;
+			}
+
+			.section-title {
+				margin: 0;
+				font-size: 18px;
+				font-weight: 800;
+			}
+
+			.grid {
+				display: grid;
+				gap: 12px;
+			}
+
+			label {
+	display: block;
+	margin: 0 0 8px;
+	font-size: 15px;        /* maior */
+	font-weight: 800;       /* mais forte */
+	color: #0f172a;         /* mais escuro */
+	letter-spacing: 0.02em; /* ligeiro espaçamento */
+}
+
+			input {
+				width: 100%;
+				border-radius: 16px;
+				border: 1px solid rgba(148, 163, 184, 0.4);
+				background: rgba(255,255,255,0.92);
+				padding: 15px 16px;
+				font-size: 16px;
+				color: var(--text);
+				transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+			}
+
+			input:focus {
+				outline: none;
+				border-color: rgba(15, 23, 42, 0.8);
+				box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+			}
+
+			input[type="file"] {
+				padding: 12px;
+				background: rgba(248, 250, 252, 0.95);
+			}
+			.title-badge {
+	background: #000;
+	color: #fff;
+	padding: 10px 18px;
+	border-radius: 150px;
+	display: inline-block;
+	font-size: 16px;
+	font-weight: 800;
+	text-align: center;
+	margin: 0 auto; /* centra */
+}
+
+			button {
+				width: 100%;
+				padding: 18px;
+				border-radius: 20px;
+				border: none;
+				background: #000;
+				color: #fff;
+				font-size: 18px;
+				font-weight: 600;
+				cursor: pointer;
+			}
+
+			button:active {
+				transform: scale(0.985);
+			}
+
+			button.secondary {
+				background: #eef2f7;
+				color: #334155;
+				box-shadow: none;
+			}
+
+			button.danger {
+				background: #dc2626;
+				box-shadow: 0 12px 22px rgba(220, 38, 38, 0.22);
+			}
+
+			button.logout {
+				background: #dc2626;
+				box-shadow: 0 12px 22px rgba(220, 38, 38, 0.22);
+			}
+
+			button.small {
+				width: auto;
+				padding: 11px 14px;
+				font-size: 14px;
+				border-radius: 14px;
+			}
+
+			.icon-btn {
+				width: auto;
+				padding: 12px 14px;
+				border-radius: 16px;
+			}
+
+			.actions-grid {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 12px;
+			}
+
+			.menu-button {
+	padding: 18px;
+	text-align: center;
+	border-radius: 22px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+			.menu-button span {
+				display: block;
+			}
+
+			.menu-title {
+				font-size: 17px;
+				margin-bottom: 4px;
+			}
+
+			.menu-subtitle {
+				font-size: 13px;
+				font-weight: 600;
+				opacity: 0.9;
+			}
+
+			.top-bar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+			}
+
+			.top-bar button {
+				margin: 0;
+			}
+
+			.role-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				align-self: center;
+				background: rgba(15, 23, 42, 0.08);
+				color: #111827;
+				padding: 9px 12px;
+				border-radius: 999px;
+				font-size: 12px;
+				font-weight: 800;
+			}
+
+			.hint,
+			.info,
+			.success,
+			.error {
+				font-size: 13px;
+				line-height: 1.45;
+				border-radius: 14px;
+				padding: 12px 14px;
+				margin: 0;
+			}
+
+			.hint,
+			.info {
+				background: rgba(15, 23, 42, 0.05);
+				color: #475569;
+			}
+
+			.success {
+				background: rgba(22, 163, 74, 0.1);
+				color: var(--success);
+				font-weight: 800;
+			}
+
+			.error {
+				background: rgba(220, 38, 38, 0.1);
+				color: #b91c1c;
+				font-weight: 800;
+			}
+
+			.result-list {
+				flex: 1;
+				min-height: 0;
+				overflow: auto;
+				padding-right: 2px;
+				display: grid;
+				gap: 12px;
+			}
+
+			.result-list::-webkit-scrollbar {
+				width: 8px;
+			}
+
+			.result-list::-webkit-scrollbar-thumb {
+				background: rgba(148, 163, 184, 0.45);
+				border-radius: 999px;
+			}
+
+			.result-card {
+				background: var(--panel-strong);
+				border-radius: 20px;
+				padding: 15px;
+				border: 1px solid rgba(148, 163, 184, 0.18);
+				box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+				display: grid;
+				gap: 10px;
+			}
+
+			.result-row {
+				display: flex;
+				gap: 8px;
+				align-items: flex-start;
+				flex-wrap: wrap;
+			}
+
+			.result-label {
+				font-weight: 800;
+				color: #334155;
+			}
+
+			.result-value-big {
+				font-size: 18px;
+				font-weight: 800;
+			}
+
+			.mono {
+				font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+				word-break: break-all;
+			}
+
+			.result-actions {
+				display: flex;
+				gap: 10px;
+				flex-wrap: wrap;
+			}
+
+			.result-card img,
+			.preview-image {
+				width: 100%;
+				border-radius: 18px;
+				border: 1px solid rgba(148, 163, 184, 0.22);
+				background: #fff;
+				object-fit: cover;
+				max-height: 220px;
+			}
+
+			.hidden {
+				display: none !important;
+			}
+
+			.stretch {
+				flex: 1;
+			}
+
+			.spacer-top {
+				margin-top: 4px;
+			}
+
+			.footer-note {
+				text-align: center;
+				font-size: 12px;
+				color: var(--muted);
+			}
+
+			@media (max-width: 560px) {
+				body {
+					padding: 0;
+				}
+
+				.app-shell {
+					width: 100%;
+					height: 100dvh;
+					max-height: none;
+					border-radius: 0;
+					border: none;
+				}
+
+				.screen {
+					padding-left: 14px;
+					padding-right: 14px;
+				}
+
+				.card {
+					padding: 16px;
+					border-radius: 22px;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="app-shell">
+			<div class="app-container">
+				<section id="loginScreen" class="screen active">
+					<div class="screen-inner screen-center">
+						<div class="header">
+							<div class="brand-row">
+								<div class="brand-chip">AP Manager</div>
+							</div>
+							<h1 class="title">Gestão rápida de APs</h1>
+						</div>
+
+						<div class="card">
+							<div class="card-header">
+								<h2 class="section-title title-badge">Iniciar sessão</h2>
+							</div>
+							<div class="grid">
+								<div>
+									<label for="username">Utilizador</label>
+									<input type="text" id="username" placeholder="Username" autocomplete="username" />
+								</div>
+								<div>
+									<label for="password">Password</label>
+									<input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+								</div>
+								<button id="loginBtn" type="button">Entrar</button>
+								<div id="loginResult"></div>
+							</div>
+						</div>
+
+					</div>
+				</section>
+
+				<section id="menuScreen" class="screen">
+					<div class="screen-inner screen-center">
+						<div class="header">
+							<div class="brand-chip">MENU PRINCIPAL</div>
+							<h1 class="title">Escolhe a ação</h1>
+							<div id="userInfo" class="role-badge"></div>
+						</div>
+
+						<div class="card">
+							<div class="actions-grid">
+								<button id="goRegisterBtn" class="menu-button" type="button">
+									<span class="menu-title">Registar AP</span>
+								</button>
+								<button id="goSearchBtn" class="menu-button" type="button">
+									<span class="menu-title">Pesquisar AP</span>
+								</button>
+								<button id="logoutBtn" class="logout" type="button">Logout</button>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<section id="registerScreen" class="screen">
+					<div class="screen-inner">
+						<div class="top-bar">
+							<button id="backFromRegisterBtn" class="secondary icon-btn" type="button">Voltar</button>
+							
+						</div>
+
+						<div class="header">
+							<h1 class="title">Registar AP</h1>
+							
+						</div>
+
+						<div class="card fill">
+							<form id="uploadForm" class="stretch grid">
+								<div>
+									<label for="quarto">Quarto</label>
+									<input type="text" id="quarto" placeholder="Ex: Bar" required="required" />
+								</div>
+
+								<div>
+									<label for="photo">Foto do AP</label>
+									<input type="file" id="photo" accept="image/*" capture="environment" required="required" />
+								</div>
+
+								
+								<img id="photoPreview" class="preview-image hidden" alt="Pré-visualização da foto" />
+
+								<div class="stretch"></div>
+								<button type="submit">Guardar registo</button>
+								<div id="uploadResult"></div>
+							</form>
+						</div>
+					</div>
+				</section>
+
+				<section id="searchScreen" class="screen">
+					<div class="screen-inner">
+						<div class="top-bar">
+							<button id="backFromSearchBtn" class="secondary icon-btn" type="button">Voltar</button>
+							
+						</div>
+
+						<div class="header">
+							<h1 class="title">Pesquisar AP</h1>
+							
+						</div>
+
+						<div class="card fill">
+							<div class="grid spacer-top">
+								<div>
+									<label for="searchQuarto">Quarto</label>
+									<input type="text" id="searchQuarto" placeholder="Pesquisar por quarto" />
+								</div>
+								<div>
+									<label for="searchMac">MAC</label>
+									<input type="text" id="searchMac" placeholder="Pesquisar por MAC" />
+								</div>
+								<div class="hint">O MAC pode ser parcial: início, meio ou fim.</div>
+								<button id="searchBtn" type="button">Procurar</button>
+							</div>
+
+							<div id="results" class="result-list"></div>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div>
+
+		<script>
+			let token = sessionStorage.getItem("token") || "";
+			let role = sessionStorage.getItem("role") || "";
+			let usernameLogged = sessionStorage.getItem("username") || "";
+
+			const loginBtn = document.getElementById("loginBtn");
+			const loginResult = document.getElementById("loginResult");
+			const goRegisterBtn = document.getElementById("goRegisterBtn");
+			const goSearchBtn = document.getElementById("goSearchBtn");
+			const logoutBtn = document.getElementById("logoutBtn");
+			const backFromRegisterBtn = document.getElementById("backFromRegisterBtn");
+			const backFromSearchBtn = document.getElementById("backFromSearchBtn");
+			const uploadForm = document.getElementById("uploadForm");
+			const uploadResult = document.getElementById("uploadResult");
+			const searchBtn = document.getElementById("searchBtn");
+			const resultsDiv = document.getElementById("results");
+			const userInfo = document.getElementById("userInfo");
+			const photoInput = document.getElementById("photo");
+			const photoPreview = document.getElementById("photoPreview");
+
+			function showScreen(screenId) {
+				const screens = document.querySelectorAll(".screen");
+				screens.forEach(function (screen) {
+					screen.classList.remove("active");
+				});
+				document.getElementById(screenId).classList.add("active");
+			}
+
+			function saveSession(accessToken, userRole, username) {
+				token = accessToken || "";
+				role = userRole || "";
+				usernameLogged = username || "";
+
+				sessionStorage.setItem("token", token);
+				sessionStorage.setItem("role", role);
+				sessionStorage.setItem("username", usernameLogged);
+			}
+
+			function clearSession() {
+				token = "";
+				role = "";
+				usernameLogged = "";
+
+				sessionStorage.removeItem("token");
+				sessionStorage.removeItem("role");
+				sessionStorage.removeItem("username");
+			}
+
+			function clearElement(element) {
+				while (element.firstChild) {
+					element.removeChild(element.firstChild);
+				}
+			}
+
+			function clearUiState() {
+				document.getElementById("username").value = "";
+				document.getElementById("password").value = "";
+				document.getElementById("quarto").value = "";
+				document.getElementById("photo").value = "";
+				document.getElementById("searchQuarto").value = "";
+				document.getElementById("searchMac").value = "";
+
+				photoPreview.src = "";
+				photoPreview.classList.add("hidden");
+
+				clearElement(loginResult);
+				clearElement(uploadResult);
+				clearElement(resultsDiv);
+			}
+
+			function goToLogin(message = "") {
+				clearSession();
+				clearUiState();
+
+				if (message) {
+					alert(message);
+				}
+
+				showScreen("loginScreen");
+			}
+
+			function resetRegisterForm() {
+				document.getElementById("quarto").value = "";
+				document.getElementById("photo").value = "";
+				photoPreview.src = "";
+				photoPreview.classList.add("hidden");
+			}
+
+			function setUserInfo() {
+				userInfo.textContent = "Utilizador: " + usernameLogged + " • Perfil: " + role;
+			}
+
+			function createMessage(type, text) {
+				const p = document.createElement("p");
+				p.className = type;
+				p.textContent = text;
+				return p;
+			}
+
+			async function apiFetch(url, options = {}) {
+				const headers = {
+					...(options.headers || {})
+				};
+
+				if (token) {
+					headers.Authorization = "Bearer " + token;
+				}
+
+				const response = await fetch(url, {
+					...options,
+					headers
+				});
+
+				if (response.status === 401) {
+					goToLogin("Sessão expirada. Faça login novamente.");
+					return null;
+				}
+
+				return response;
+			}
+
+			function bootstrapAuth() {
+				if (token) {
+					setUserInfo();
+					showScreen("menuScreen");
+				} else {
+					showScreen("loginScreen");
+				}
+			}
+
+			async function compressImage(file) {
+				return new Promise(function (resolve, reject) {
+					if (!file) {
+						reject(new Error("Nenhuma imagem selecionada."));
+						return;
+					}
+
+					const img = new Image();
+					const reader = new FileReader();
+
+					reader.onerror = function () {
+						reject(new Error("Erro ao ler a imagem."));
+					};
+
+					reader.onload = function (e) {
+						img.src = e.target.result;
+					};
+
+					img.onerror = function () {
+						reject(new Error("Erro ao carregar a imagem."));
+					};
+
+					img.onload = function () {
+						const canvas = document.createElement("canvas");
+						const maxSize = 1600;
+
+						let width = img.width;
+						let height = img.height;
+
+						if (width > height && width > maxSize) {
+							height = Math.round(height * (maxSize / width));
+							width = maxSize;
+						} else if (height > maxSize) {
+							width = Math.round(width * (maxSize / height));
+							height = maxSize;
+						}
+
+						canvas.width = width;
+						canvas.height = height;
+
+						const ctx = canvas.getContext("2d");
+						ctx.drawImage(img, 0, 0, width, height);
+
+						canvas.toBlob(function (blob) {
+							if (!blob) {
+								reject(new Error("Não foi possível comprimir a imagem."));
+								return;
+							}
+							resolve(blob);
+						}, "image/jpeg", 0.8);
+					};
+
+					reader.readAsDataURL(file);
+				});
+			}
+
+			async function loadProtectedImage(imgElement, url) {
+				const res = await apiFetch(url);
+
+				if (!res) {
+					throw new Error("Sessão expirada");
+				}
+
+				if (!res.ok) {
+					throw new Error("Erro ao carregar imagem");
+				}
+
+				const blob = await res.blob();
+				const objectUrl = URL.createObjectURL(blob);
+				imgElement.src = objectUrl;
+			}
+
+			function renderSearchResults(results) {
+				clearElement(resultsDiv);
+
+				if (!results || results.length === 0) {
+					resultsDiv.appendChild(createMessage("info", "Sem resultados."));
+					return;
+				}
+
+				results.forEach(function (r) {
+					const card = document.createElement("div");
+					card.className = "result-card";
+
+					const roomRow = document.createElement("div");
+					roomRow.className = "result-row";
+					roomRow.innerHTML = '<span class="result-label">Quarto:</span><span class="result-value-big">' + (r.quarto || "") + "</span>";
+					card.appendChild(roomRow);
+
+					const macRow = document.createElement("div");
+					macRow.className = "result-row";
+					macRow.innerHTML = '<span class="result-label">MAC:</span><span class="mono">' + (r.mac || "") + "</span>";
+					card.appendChild(macRow);
+
+					const actions = document.createElement("div");
+					actions.className = "result-actions";
+
+					if (r.foto) {
+						const viewBtn = document.createElement("button");
+						viewBtn.className = "secondary small";
+						viewBtn.type = "button";
+						viewBtn.textContent = "Ver foto";
+
+						const img = document.createElement("img");
+						img.alt = "Foto do AP";
+						img.classList.add("hidden");
+
+						viewBtn.addEventListener("click", function () {
+							if (!img.classList.contains("hidden")) {
+								img.classList.add("hidden");
+								viewBtn.textContent = "Ver foto";
+								return;
+							}
+
+							if (!img.src) {
+								loadProtectedImage(img, r.foto).catch(function () {
+									if (img.parentNode) {
+										img.parentNode.removeChild(img);
+									}
+									if (viewBtn.parentNode) {
+										viewBtn.parentNode.removeChild(viewBtn);
+									}
+									card.appendChild(createMessage("info", "Não foi possível carregar a imagem."));
+								});
+							}
+
+							img.classList.remove("hidden");
+							viewBtn.textContent = "Ocultar foto";
+						});
+
+						actions.appendChild(viewBtn);
+						card.appendChild(actions);
+						card.appendChild(img);
+					}
+
+					if (role === "admin") {
+						const deleteBtn = document.createElement("button");
+						deleteBtn.className = "danger small";
+						deleteBtn.type = "button";
+						deleteBtn.textContent = "Apagar registo";
+						deleteBtn.addEventListener("click", function () {
+							deleteAP(r.id);
+						});
+						actions.appendChild(deleteBtn);
+					}
+
+					resultsDiv.appendChild(card);
+				});
+			}
+
+			async function deleteAP(apId) {
+				if (!confirm("Tens a certeza que queres apagar este registo?")) {
+					return;
+				}
+
+				try {
+					const res = await apiFetch("/aps/" + encodeURIComponent(apId), {
+						method: "DELETE"
+					});
+
+					if (!res) return;
+
+					const data = await res.json();
+
+					if (res.ok && data.success) {
+						alert(data.message || "Registo apagado com sucesso.");
+						searchBtn.click();
+					} else {
+						alert(data.detail || data.message || "Erro ao apagar o registo.");
+					}
+				} catch (error) {
+					alert("Erro de ligação ao servidor.");
+				}
+			}
+
+			function logout() {
+				goToLogin();
+			}
+
+			loginBtn.addEventListener("click", async function () {
+				const username = document.getElementById("username").value.trim();
+				const password = document.getElementById("password").value;
+
+				clearElement(loginResult);
+
+				try {
+					const res = await fetch("/auth/login", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({
+							username: username,
+							password: password
+						})
+					});
+
+					const data = await res.json();
+
+					if (res.ok) {
+    const accessToken = data.access_token || "";
+    const userRole = data.role || data.user?.role || "";
+    const loggedUsername = data.username || data.user?.username || username;
+
+    console.log("LOGIN RESPONSE:", data);
+
+    saveSession(accessToken, userRole, loggedUsername);
+    setUserInfo();
+    showScreen("menuScreen");
+} else {
+						loginResult.appendChild(createMessage("error", data.detail || "Login inválido"));
+					}
+				} catch (error) {
+					loginResult.appendChild(createMessage("error", "Erro de ligação ao servidor."));
+				}
+			});
+
+			goRegisterBtn.addEventListener("click", function () {
+				clearElement(uploadResult);
+				showScreen("registerScreen");
+			});
+
+			goSearchBtn.addEventListener("click", function () {
+				clearElement(resultsDiv);
+				showScreen("searchScreen");
+			});
+
+			backFromRegisterBtn.addEventListener("click", function () {
+				showScreen("menuScreen");
+			});
+
+			backFromSearchBtn.addEventListener("click", function () {
+				showScreen("menuScreen");
+			});
+
+			logoutBtn.addEventListener("click", function () {
+				goToLogin();
+			});
+
+			photoInput.addEventListener("change", function () {
+				const file = photoInput.files[0];
+				if (!file) {
+					photoPreview.src = "";
+					photoPreview.classList.add("hidden");
+					return;
+				}
+				const localUrl = URL.createObjectURL(file);
+				photoPreview.src = localUrl;
+				photoPreview.classList.remove("hidden");
+			});
+
+			uploadForm.addEventListener("submit", async function (e) {
+				e.preventDefault();
+
+				const quarto = document.getElementById("quarto").value.trim();
+				const photo = document.getElementById("photo").files[0];
+
+				clearElement(uploadResult);
+
+				if (!photo) {
+					uploadResult.appendChild(createMessage("error", "Seleciona uma foto."));
+					return;
+				}
+
+				try {
+					const compressed = await compressImage(photo);
+
+					const formData = new FormData();
+					formData.append("quarto", quarto);
+					formData.append("photo", compressed, "upload.jpg");
+
+					const res = await apiFetch("/aps/upload", {
+						method: "POST",
+						body: formData
+					});
+
+					if (!res) return;
+
+					const data = await res.json();
+
+					if (res.ok && data.success) {
+						uploadResult.appendChild(createMessage("success", "MAC " + data.mac + " registado no quarto " + data.quarto + "."));
+						resetRegisterForm();
+					} else {
+						uploadResult.appendChild(createMessage("error", data.message || data.detail || "Erro no registo."));
+					}
+				} catch (error) {
+					uploadResult.appendChild(createMessage("error", error.message || "Erro de ligação ao servidor."));
+				}
+			});
+
+			searchBtn.addEventListener("click", async function () {
+				const quarto = document.getElementById("searchQuarto").value.trim();
+				const mac = document.getElementById("searchMac").value.trim();
+
+				let params = [];
+
+				if (quarto) {
+					params.push("quarto=" + encodeURIComponent(quarto));
+				}
+
+				if (mac) {
+					params.push("mac=" + encodeURIComponent(mac));
+				}
+
+				let url = "/aps/search";
+				if (params.length > 0) {
+					url += "?" + params.join("&");
+				}
+
+				try {
+					const res = await apiFetch(url);
+					if (!res) return;
+
+					const data = await res.json();
+
+					if (res.ok) {
+						renderSearchResults(data.results || []);
+					} else {
+						clearElement(resultsDiv);
+						resultsDiv.appendChild(createMessage("error", data.detail || "Erro na pesquisa."));
+					}
+				} catch (error) {
+					clearElement(resultsDiv);
+					resultsDiv.appendChild(createMessage("error", "Erro de ligação ao servidor."));
+				}
+			});
+
+			document.getElementById("searchQuarto").addEventListener("keydown", function (e) {
+				if (e.key === "Enter") {
+					searchBtn.click();
+				}
+			});
+
+			document.getElementById("searchMac").addEventListener("keydown", function (e) {
+				if (e.key === "Enter") {
+					searchBtn.click();
+				}
+			});
+
+			bootstrapAuth();
+		</script>
+	</body>
+</html>
